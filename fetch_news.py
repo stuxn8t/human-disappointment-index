@@ -65,7 +65,7 @@ def fetch_news():
 
 def analyze_with_gemini(articles):
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash")
 
     news_text = "\n\n".join([
         f"[{i+1}] 제목: {a['title']}\n내용: {a.get('description', '')}"
