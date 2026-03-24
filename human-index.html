@@ -230,6 +230,67 @@
       flex-shrink: 0;
     }
 
+    /* 기사 목록 */
+    .articles-panel { grid-column: 1 / -1; }
+    .articles-toolbar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 5px 12px;
+      font-family: var(--mono); font-size: .7rem;
+      color: var(--muted); cursor: pointer; transition: all .2s;
+      letter-spacing: .05em;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--red); color: var(--red2);
+      background: rgba(204,34,0,.08);
+    }
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .article-card {
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 16px;
+      text-decoration: none;
+      display: block;
+      transition: all .2s;
+    }
+    .article-card:hover {
+      border-color: var(--red);
+      background: rgba(204,34,0,.05);
+      transform: translateY(-2px);
+    }
+    .article-source {
+      font-family: var(--mono); font-size: .65rem;
+      color: var(--amber2); letter-spacing: .1em;
+      margin-bottom: 8px;
+    }
+    .article-title {
+      font-size: .88rem; font-weight: 700; color: #fff;
+      line-height: 1.5; margin-bottom: 8px;
+    }
+    .article-desc {
+      font-size: .78rem; color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .article-date {
+      font-family: var(--mono); font-size: .63rem;
+      color: var(--border); margin-top: 10px;
+    }
+    .articles-empty {
+      font-family: var(--mono); font-size: .8rem;
+      color: var(--muted); padding: 20px 0;
+    }
+
     /* 히스토리 차트 */
     .history-panel { grid-column: 1 / -1; }
     .chart-wrap { position: relative; }
@@ -360,6 +421,21 @@
     </div>
   </div>
 
+  <!-- 기사 목록 -->
+  <div class="panel articles-panel">
+    <div class="panel-label">오늘 수집된 기사</div>
+    <div class="articles-toolbar">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="animal">동물 학대</button>
+      <button class="filter-btn" data-filter="environment">환경 파괴</button>
+      <button class="filter-btn" data-filter="crime">살인/폭력</button>
+      <button class="filter-btn" data-filter="manner">갑질/비매너</button>
+    </div>
+    <div class="articles-grid" id="articlesGrid">
+      <div class="articles-empty">데이터 로딩 중...</div>
+    </div>
+  </div>
+
   <!-- 히스토리 -->
   <div class="panel history-panel">
     <div class="panel-label">최근 30일 추이</div>
@@ -451,8 +527,66 @@
       list.appendChild(el);
     });
 
+    // 기사 목록
+    renderArticles(today.articles || []);
+
+    // 필터 버튼
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderArticles(today.articles || [], btn.dataset.filter);
+      });
+    });
+
     // 차트
     renderChart(history);
+  }
+
+  const KEYWORDS = {
+    animal:      ['animal', 'cruelty', 'abuse', '동물', '학대', '유기', '虐待'],
+    environment: ['environment', 'deforest', 'pollution', 'climate', '환경', '파괴', '오염', '생태'],
+    crime:       ['murder', 'kill', 'homicide', 'shooting', '살인', '폭행', '폭력', '범죄'],
+    manner:      ['갑질', 'harassment', 'bully', '폭언', '비매너', '민폐'],
+  };
+
+  function detectCategory(article) {
+    const text = ((article.title || '') + ' ' + (article.description || '')).toLowerCase();
+    for (const [cat, words] of Object.entries(KEYWORDS)) {
+      if (words.some(w => text.includes(w.toLowerCase()))) return cat;
+    }
+    return 'other';
+  }
+
+  function renderArticles(articles, filter = 'all') {
+    const grid = document.getElementById('articlesGrid');
+    grid.innerHTML = '';
+
+    const filtered = filter === 'all'
+      ? articles
+      : articles.filter(a => detectCategory(a) === filter);
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="articles-empty">해당 카테고리 기사가 없습니다.</div>';
+      return;
+    }
+
+    filtered.forEach(a => {
+      const card = document.createElement('a');
+      card.className = 'article-card';
+      card.href = a.url || '#';
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+
+      const date = a.publishedAt ? new Date(a.publishedAt).toLocaleString('ko-KR') : '';
+      card.innerHTML = `
+        <div class="article-source">${a.source || 'UNKNOWN SOURCE'}</div>
+        <div class="article-title">${a.title}</div>
+        <div class="article-desc">${a.description || ''}</div>
+        <div class="article-date">${date}</div>
+      `;
+      grid.appendChild(card);
+    });
   }
 
   function renderChart(history) {
