@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>나의 TMI 유형 테스트 💥</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Round+Square:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --card2: #16213e;
+      --accent1: #FF6B6B;
+      --accent2: #FFE66D;
+      --accent3: #4ECDC4;
+      --accent4: #C77DFF;
+      --text: #f0f0f0;
+      --muted: #888;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nanum Round Square', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* 배경 파티클 */
+    .bg-blobs {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      animation: blobMove 12s ease-in-out infinite;
+    }
+    .blob1 { width: 400px; height: 400px; background: #FF6B6B; top: -100px; left: -100px; animation-delay: 0s; }
+    .blob2 { width: 350px; height: 350px; background: #C77DFF; bottom: -80px; right: -80px; animation-delay: 3s; }
+    .blob3 { width: 300px; height: 300px; background: #4ECDC4; top: 40%; left: 60%; animation-delay: 6s; }
+    @keyframes blobMove {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(30px,20px) scale(1.1); }
+    }
+
+    /* 컨테이너 */
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 640px;
+    }
+
+    /* 스크린 공통 */
+    .screen { display: none; animation: fadeIn .4s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── INTRO ── */
+    .intro-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 52px 40px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+    }
+    .intro-emoji { font-size: 5rem; display: block; margin-bottom: 20px; animation: shake 2.5s ease-in-out infinite; }
+    @keyframes shake {
+      0%,100% { transform: rotate(0deg); }
+      20%      { transform: rotate(-10deg); }
+      40%      { transform: rotate(10deg); }
+      60%      { transform: rotate(-6deg); }
+      80%      { transform: rotate(6deg); }
+    }
+    .intro-title {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, #FF6B6B, #FFE66D, #4ECDC4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 12px; line-height: 1.3;
+    }
+    .intro-sub { color: var(--muted); font-size: .95rem; line-height: 1.8; margin-bottom: 32px; }
+    .intro-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+    .tag {
+      background: rgba(255,255,255,.08);
+      padding: 6px 14px; border-radius: 50px;
+      font-size: .78rem; color: var(--muted);
+    }
+    .btn-start {
+      width: 100%; padding: 18px;
+      border-radius: 50px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #FF6B6B, #C77DFF);
+      color: #fff; font-family: 'Nanum Round Square', sans-serif;
+      font-size: 1.1rem; font-weight: 800;
+      transition: all .25s;
+      box-shadow: 0 8px 28px rgba(255,107,107,.35);
+    }
+    .btn-start:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 36px rgba(255,107,107,.5); }
+
+    /* ── QUIZ ── */
+    .quiz-header { margin-bottom: 24px; }
+    .progress-info {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 10px;
+    }
+    .q-num { font-size: .82rem; color: var(--muted); font-weight: 700; }
+    .q-num span { color: var(--accent2); }
+    .progress-bar {
+      height: 6px; background: rgba(255,255,255,.1);
+      border-radius: 50px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF6B6B, #C77DFF);
+      border-radius: 50px;
+      transition: width .4s ease;
+    }
+
+    .quiz-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+    }
+    .q-emoji { font-size: 2.4rem; display: block; margin-bottom: 14px; }
+    .q-text {
+      font-size: 1.2rem; font-weight: 800; line-height: 1.6;
+      margin-bottom: 28px; color: #fff;
+    }
+    .answers { display: flex; flex-direction: column; gap: 12px; }
+    .ans-btn {
+      background: rgba(255,255,255,.06);
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-radius: 14px; padding: 16px 20px;
+      color: var(--text); cursor: pointer;
+      font-family: 'Nanum Round Square', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      text-align: left; transition: all .2s;
+    }
+    .ans-btn:hover {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.3);
+      transform: translateX(6px);
+    }
+    .ans-btn.selected {
+      background: linear-gradient(135deg, rgba(255,107,107,.25), rgba(199,125,255,.25));
+      border-color: #C77DFF;
+      color: #fff;
+    }
+    .ans-btn .ans-label {
+      display: inline-block;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,.1);
+      text-align: center; line-height: 26px;
+      font-size: .78rem; margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── LOADING ── */
+    .loading-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 80px 40px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.07);
+    }
+    .loading-emoji { font-size: 4rem; display: block; margin-bottom: 20px; animation: spin 1.5s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .loading-text { font-size: 1.1rem; font-weight: 800; color: var(--muted); }
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+      100% { content: ''; }
+    }
+
+    /* ── RESULT ── */
+    .result-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 48px 40px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+      position: relative; overflow: hidden;
+    }
+    .result-glow {
+      position: absolute; inset: 0; opacity: .12;
+      border-radius: var(--radius);
+    }
+    .result-badge {
+      display: inline-block;
+      padding: 6px 18px; border-radius: 50px;
+      font-size: .78rem; font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .result-emoji { font-size: 5rem; display: block; margin-bottom: 16px; animation: resultPop .5s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes resultPop {
+      0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .result-type { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+    .result-subtitle { font-size: 1rem; color: var(--muted); margin-bottom: 24px; }
+    .result-desc {
+      background: rgba(255,255,255,.05);
+      border-radius: 14px; padding: 20px;
+      font-size: .92rem; line-height: 1.9;
+      color: rgba(255,255,255,.85);
+      margin-bottom: 20px; text-align: left;
+    }
+    .result-features {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-bottom: 32px;
+    }
+    .feature-tag {
+      padding: 6px 14px; border-radius: 50px;
+      font-size: .78rem; font-weight: 700;
+      background: rgba(255,255,255,.08);
+    }
+
+    .result-others { margin-bottom: 32px; }
+    .result-others h4 { font-size: .82rem; color: var(--muted); margin-bottom: 14px; font-weight: 700; }
+    .other-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .other-type-card {
+      background: rgba(255,255,255,.05);
+      border-radius: 12px; padding: 12px 8px;
+      font-size: .78rem; text-align: center;
+    }
+    .other-type-card .ot-emoji { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .other-type-card .ot-name { font-weight: 800; font-size: .75rem; }
+
+    .btn-retry {
+      width: 100%; padding: 16px;
+      border-radius: 50px; border: 2px solid rgba(255,255,255,.15);
+      background: transparent; color: var(--text);
+      font-family: 'Nanum Round Square', sans-serif;
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-retry:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.3); }
+
+    /* 파티클 */
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      font-size: 1.4rem;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .intro-card, .quiz-card, .result-card { padding: 32px 24px; }
+      .intro-title { font-size: 1.6rem; }
+      .q-text { font-size: 1.05rem; }
+      .other-types { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<div class="container">
+
+  <!-- ── 인트로 ── -->
+  <div class="screen active" id="screenIntro">
+    <div class="intro-card">
+      <span class="intro-emoji">💥</span>
+      <h1 class="intro-title">나의 TMI 유형은?</h1>
+      <p class="intro-sub">
+        당신은 어떤 TMI를 가진 사람인가요?<br/>
+        12개의 진지한 척 웃긴 질문으로 알아보세요.<br/>
+        <strong style="color:#FFE66D;">결과에 공감하면 그냥 웃고 넘기세요 😂</strong>
+      </p>
+      <div class="intro-tags">
+        <span class="tag">⏱️ 약 2분</span>
+        <span class="tag">❓ 12문항</span>
+        <span class="tag">🔬 4가지 유형</span>
+        <span class="tag">🎲 병맛 주의</span>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">테스트 시작하기 →</button>
+    </div>
+  </div>
+
+  <!-- ── 퀴즈 ── -->
+  <div class="screen" id="screenQuiz">
+    <div class="quiz-header">
+      <div class="progress-info">
+        <div class="q-num">질문 <span id="qCurrent">1</span> / 12</div>
+        <div class="q-num" id="qPercent">0%</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="quiz-card">
+      <span class="q-emoji" id="qEmoji">🤔</span>
+      <div class="q-text" id="qText">질문 로딩 중...</div>
+      <div class="answers" id="answersBox"></div>
+    </div>
+  </div>
+
+  <!-- ── 로딩 ── -->
+  <div class="screen" id="screenLoading">
+    <div class="loading-card">
+      <span class="loading-emoji">🧬</span>
+      <div class="loading-text">TMI DNA 분석 중<span class="loading-dots"></span></div>
+    </div>
+  </div>
+
+  <!-- ── 결과 ── -->
+  <div class="screen" id="screenResult">
+    <div class="result-card">
+      <div class="result-glow" id="resultGlow"></div>
+      <div class="result-badge" id="resultBadge">유형</div>
+      <span class="result-emoji" id="resultEmoji">🎯</span>
+      <div class="result-type" id="resultType">유형명</div>
+      <div class="result-subtitle" id="resultSubtitle">부제목</div>
+      <div class="result-desc" id="resultDesc">설명</div>
+      <div class="result-features" id="resultFeatures"></div>
+      <div class="result-others">
+        <h4>다른 유형들은?</h4>
+        <div class="other-types" id="otherTypes"></div>
+      </div>
+      <button class="btn-retry" onclick="resetQuiz()">🔄 다시 테스트하기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── 질문 데이터 ──
+  // A: 생활밀착형, B: 충동폭발형, C: 관찰수집형, D: 잠수함형
+  const questions = [
+    {
+      emoji: "🛒",
+      text: "마트에서 삼겹살 1+1 행사를 발견했다. 나는?",
+      answers: [
+        { text: "카톡 가족방에 사진 찍어 올린다. 지금 당장.", type: "A" },
+        { text: '옆에 있는 모르는 아저씨한테 "이거 완전 싸요!" 라고 말한다.', type: "B" },
+        { text: "속으로 오호~ 하고 조용히 두 개 담는다.", type: "C" },
+        { text: "원래 삼겹살 살 계획이 없었는데 일단 사고 집에서 후회한다.", type: "D" },
+      ]
+    },
+    {
+      emoji: "💤",
+      text: "어젯밤 꿈에서 전 남친/여친을 봤다. 나는?",
+      answers: [
+        { text: "아침에 친구한테 꿈 내용 10분간 설명한다.", type: "A" },
+        { text: '그 자리에서 전 연인한테 "꿈 꿨어" 라고 먼저 연락한다.', type: "B" },
+        { text: "혼자 속으로 왜 나왔어... 하고 넘긴다.", type: "C" },
+        { text: "친구한테 말하려다가 결국 아무한테도 안 말한다.", type: "D" },
+      ]
+    },
+    {
+      emoji: "🍜",
+      text: "점심에 라면을 끓였는데 면이 좀 불었다. 나는?",
+      answers: [
+        { text: "인스타 스토리에 올리고 불라면도 맛있다고 쓴다.", type: "A" },
+        { text: '같이 있는 사람한테 "나 면 불렸어 어떡해" 라고 말한다.', type: "B" },
+        { text: "그냥 먹는다. 속으로 반성하면서.", type: "C" },
+        { text: '일주일 뒤에 갑자기 친구한테 "나 저번에 라면 불렸었어" 라고 꺼낸다.', type: "D" },
+      ]
+    },
+    {
+      emoji: "🚇",
+      text: "지하철에서 연예인을 목격했다! 나는?",
+      answers: [
+        { text: '내리자마자 단톡방에 "방금 OOO 봤다!!!" 폭탄 투하.', type: "A" },
+        { text: '주변 사람 팔 잡고 "저기요 저거 OOO 아닌가요?" 한다.', type: "B" },
+        { text: "혼자 사진 찍어두고 아무한테도 안 보낸다.", type: "C" },
+        { text: '도착지에서 내릴 때쯤 문득 "맞다 연예인 봤었는데" 한다.', type: "D" },
+      ]
+    },
+    {
+      emoji: "🎵",
+      text: "갑자기 10년 전 노래가 머릿속에 맴돈다. 나는?",
+      answers: [
+        { text: '친구한테 바로 노래 제목 보내고 "이 노래 기억나?" 한다.', type: "A" },
+        { text: '주변 사람한테 노래를 흥얼거리며 "이 노래 알아요?" 한다.', type: "B" },
+        { text: "혼자 유튜브 찾아서 듣고 혼자 추억에 잠긴다.", type: "C" },
+        { text: "3일 뒤에 갑자기 새벽 2시에 친구한테 그 노래 링크를 보낸다.", type: "D" },
+      ]
+    },
+    {
+      emoji: "🪥",
+      text: "양치하다가 치약이 바닥났다. 나는?",
+      answers: [
+        { text: '가족한테 "치약 없어!" 라고 화장실에서 소리친다.', type: "A" },
+        { text: "옆에 있는 사람 칫솔에 본인 치약 짜달라고 한다.", type: "B" },
+        { text: "조용히 짜서 쓰고 나중에 사온다. 말 안 함.", type: "C" },
+        { text: "다음 날 마트 가면서 잊어버리고 또 바닥날 때까지 방치한다.", type: "D" },
+      ]
+    },
+    {
+      emoji: "🤧",
+      text: "길을 걷다가 넘어질 뻔 했다. 나는?",
+      answers: [
+        { text: '친구한테 "방금 나 넘어질 뻔 했잖아 ㅋㅋㅋ" 바로 카톡.', type: "A" },
+        { text: '주위를 보고 봤는지 확인하며 "방금 봤어요?" 라고 묻는다.', type: "B" },
+        { text: "아무도 못 본 척 태연하게 걷는다. 심장은 두근두근.", type: "C" },
+        { text: "집에 도착해서 갑자기 생각나 혼자 이불 킥한다.", type: "D" },
+      ]
+    },
+    {
+      emoji: "📱",
+      text: "유튜브 알고리즘이 3년 전 내 좋아요 영상을 추천해줬다. 나는?",
+      answers: [
+        { text: '친구한테 영상 공유하며 "이거 봐 내가 3년 전에 좋아요 눌렀던 거야" 한다.', type: "A" },
+        { text: "그 자리에서 바로 그 영상을 보며 주변에 들려준다.", type: "B" },
+        { text: "혼자 쭉 정주행하며 옛날 생각에 잠긴다.", type: "C" },
+        { text: "보다가 잠든다. 나중에 기억 못 함.", type: "D" },
+      ]
+    },
+    {
+      emoji: "🍕",
+      text: "피자를 시켰는데 도우가 생각보다 두껍다. 나는?",
+      answers: [
+        { text: "사진 찍어서 리뷰란에 올리고 가족한테도 보낸다.", type: "A" },
+        { text: '배달기사님 가시기 전에 "도우가 좀 두꺼운 것 같아요" 라고 말한다.', type: "B" },
+        { text: "그냥 먹는다. 리뷰는 별 4개로 조용히.", type: "C" },
+        { text: '다 먹고 나서 "그러고 보니 도우 두꺼웠네" 한다.', type: "D" },
+      ]
+    },
+    {
+      emoji: "😴",
+      text: "어제 밤에 잠을 3시간 밖에 못 잤다. 나는?",
+      answers: [
+        { text: '만나는 모든 사람에게 "나 어젯밤에 3시간밖에 못 잤어" 를 인사처럼 한다.', type: "A" },
+        { text: '직장 상사한테도 "저 오늘 피곤해요" 라고 말한다.', type: "B" },
+        { text: "커피로 버티고 아무 말도 안 한다.", type: "C" },
+        { text: '퇴근하고 나서 친구한테 "나 사실 오늘 죽는 줄 알았어" 라고 한다.', type: "D" },
+      ]
+    },
+    {
+      emoji: "🎂",
+      text: "오늘 내 생일인데 아무도 먼저 챙겨주지 않는다. 나는?",
+      answers: [
+        { text: '카톡 상태메시지를 🎂로 바꾸고 인스타에 "오늘 생일" 스토리 올린다.', type: "A" },
+        { text: '친한 친구한테 "야 오늘 내 생일인데" 라고 직접 말한다.', type: "B" },
+        { text: '혼자 케이크 사먹고 속으로 "뭐 괜찮아" 한다. 전혀 안 괜찮음.', type: "C" },
+        { text: '일주일 뒤에 지인들 모인 자리에서 "사실 저번주가 내 생일이었는데요" 한다.', type: "D" },
+      ]
+    },
+    {
+      emoji: "🧦",
+      text: "세탁기 돌렸더니 양말 한 짝이 없어졌다. 나는?",
+      answers: [
+        { text: '가족 단톡방에 양말 사진 올리고 "이거 봤어?" 한다.', type: "A" },
+        { text: "세탁기 브랜드 고객센터에 전화해서 이 이야기를 한다.", type: "B" },
+        { text: "세탁기 안을 세 번 더 확인하고 조용히 한 짝 버린다.", type: "C" },
+        { text: "6개월 뒤 이불 정리하다 발견한다.", type: "D" },
+      ]
+    },
+  ];
+
+  // ── 결과 유형 ──
+  const results = {
+    A: {
+      emoji: "📢",
+      type: "생활밀착형 TMI",
+      subtitle: "삶 자체가 콘텐츠인 사람",
+      badge: "TYPE A",
+      color: "#FF6B6B",
+      gradient: "linear-gradient(135deg, rgba(255,107,107,.3), rgba(255,230,109,.1))",
+      desc: "당신에게 일어나는 모든 일은 공유되어야 마땅합니다.\n라면이 불어도, 양말이 없어져도, 어젯밤 꿈도 전부 다 소중한 콘텐츠입니다.\n단톡방은 당신의 개인 방송국이며, 주변인들은 자의 반 타의 반 구독자가 됩니다.\n'이걸 왜 말해?' 라는 생각 자체가 없는 것이 당신의 가장 큰 특징입니다.\n그래도 덕분에 주변이 심심하지 않다는 것 알고 계시죠?",
+      features: ["📱 카톡 보내기", "📸 사진 찍기", "🎙️ 실시간 공유", "💬 TMI 폭탄"],
+    },
+    B: {
+      emoji: "💣",
+      type: "충동폭발형 TMI",
+      subtitle: "생각이 입으로 직통 연결된 사람",
+      badge: "TYPE B",
+      color: "#FFE66D",
+      gradient: "linear-gradient(135deg, rgba(255,230,109,.3), rgba(255,107,107,.1))",
+      desc: "당신의 뇌와 입 사이에는 필터가 없습니다.\n생각이 나면 말이 나옵니다. 그것도 아주 빠르게.\n모르는 사람한테도, 배달기사님한테도, 고객센터 직원한테도 TMI를 공유합니다.\n나중에 집에 가서 '내가 왜 그랬지...'를 속삭이지만 다음날 또 합니다.\n살면서 생각하고 말하기를 시전한 적이 거의 없습니다. 용감해요 진짜로.",
+      features: ["💥 즉흥 발언", "😅 사후 후회", "🗣️ 누구에게나", "⚡ 초고속 공유"],
+    },
+    C: {
+      emoji: "🔭",
+      type: "관찰수집형 TMI",
+      subtitle: "모든 걸 알지만 아무 말도 안 하는 사람",
+      badge: "TYPE C",
+      color: "#4ECDC4",
+      gradient: "linear-gradient(135deg, rgba(78,205,196,.3), rgba(199,125,255,.1))",
+      desc: "당신은 TMI가 없는 게 아닙니다. 그냥 안 말하는 겁니다.\n모든 걸 관찰하고, 기억하고, 수집합니다. 혼자서.\n5년 전 친구가 했던 말도 기억하고, 어제 지나친 낯선 사람의 표정도 기억합니다.\n그 모든 정보는 뇌 어딘가에 조용히 쌓여있습니다.\n'근데 이거 알아?' 로 시작하는 당신의 한마디가 나올 때\n주변 사람들은 '어떻게 알았어?!'를 외칩니다.",
+      features: ["👀 예리한 관찰", "🗄️ 기억 창고", "🤫 내면 라디오", "🎯 핵심만 발언"],
+    },
+    D: {
+      emoji: "🌊",
+      type: "잠수함형 TMI",
+      subtitle: "타이밍이 항상 묘한 사람",
+      badge: "TYPE D",
+      color: "#C77DFF",
+      gradient: "linear-gradient(135deg, rgba(199,125,255,.3), rgba(78,205,196,.1))",
+      desc: "당신도 TMI가 있습니다. 근데 타이밍이... 좀 묘합니다.\n사건이 일어난 그 순간엔 아무 말도 안 하다가\n3일 후, 일주일 후, 심지어 한 달 후에 갑자기 꺼냅니다.\n'맞다 나 그때 그거 있었는데' 가 당신의 트레이드마크입니다.\n주변인들은 '왜 이제 말해...'를 입에 달고 삽니다.\n근데 신기하게도 항상 그 TMI가 제일 재밌습니다.",
+      features: ["⏰ 늦은 공개", "🌙 새벽 폭로", "😶 평소엔 침묵", "💫 역대급 타이밍"],
+    },
+  };
+
+  let scores = { A: 0, B: 0, C: 0, D: 0 };
+  let currentQ = 0;
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startQuiz() {
+    scores = { A: 0, B: 0, C: 0, D: 0 };
+    currentQ = 0;
+    showScreen('screenQuiz');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQ];
+    const total = questions.length;
+    const pct = Math.round((currentQ / total) * 100);
+
+    document.getElementById('qCurrent').textContent = currentQ + 1;
+    document.getElementById('qPercent').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('qEmoji').textContent = q.emoji;
+    document.getElementById('qText').textContent = q.text;
+
+    const box = document.getElementById('answersBox');
+    box.innerHTML = '';
+    const labels = ['A', 'B', 'C', 'D'];
+    q.answers.forEach((ans, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'ans-btn';
+      btn.innerHTML = `<span class="ans-label">${labels[i]}</span>${ans.text}`;
+      btn.onclick = () => selectAnswer(ans.type, btn);
+      box.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(type, btn) {
+    document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    scores[type]++;
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        renderQuestion();
+      } else {
+        showLoading();
+      }
+    }, 350);
+  }
+
+  function showLoading() {
+    showScreen('screenLoading');
+    setTimeout(showResult, 2000);
+  }
+
+  function showResult() {
+    const winner = Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0];
+    const r = results[winner];
+
+    document.getElementById('resultGlow').style.background = r.gradient;
+    document.getElementById('resultBadge').textContent = r.badge;
+    document.getElementById('resultBadge').style.background = r.color + '33';
+    document.getElementById('resultBadge').style.color = r.color;
+    document.getElementById('resultEmoji').textContent = r.emoji;
+    document.getElementById('resultType').textContent = r.type;
+    document.getElementById('resultType').style.color = r.color;
+    document.getElementById('resultSubtitle').textContent = r.subtitle;
+    document.getElementById('resultDesc').textContent = r.desc;
+
+    const featBox = document.getElementById('resultFeatures');
+    featBox.innerHTML = '';
+    r.features.forEach(f => {
+      const el = document.createElement('div');
+      el.className = 'feature-tag';
+      el.style.color = r.color;
+      el.textContent = f;
+      featBox.appendChild(el);
+    });
+
+    const othersBox = document.getElementById('otherTypes');
+    othersBox.innerHTML = '';
+    Object.entries(results).filter(([k]) => k !== winner).forEach(([, v]) => {
+      const el = document.createElement('div');
+      el.className = 'other-type-card';
+      el.innerHTML = `<span class="ot-emoji">${v.emoji}</span><div class="ot-name" style="color:${v.color}">${v.type}</div>`;
+      othersBox.appendChild(el);
+    });
+
+    showScreen('screenResult');
+    launchConfetti();
+  }
+
+  function launchConfetti() {
+    const wrap = document.getElementById('confettiWrap');
+    wrap.innerHTML = '';
+    const emojis = ['🎉','✨','💥','🎊','⭐','🌟','💫','🎈'];
+    for (let i = 0; i < 30; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (1 + Math.random() * 1.2) + 'rem';
+      el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      el.style.animationDelay = (Math.random() * 1.5) + 's';
+      wrap.appendChild(el);
+    }
+    setTimeout(() => wrap.innerHTML = '', 4000);
+  }
+
+  function resetQuiz() {
+    showScreen('screenIntro');
+  }
+</script>
+</body>
+</html>
